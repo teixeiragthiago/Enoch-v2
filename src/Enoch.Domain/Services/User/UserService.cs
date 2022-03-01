@@ -3,6 +3,7 @@ using Enoch.CrossCutting.Notification;
 using Enoch.Domain.Services.User.Common;
 using Enoch.Domain.Services.User.Dto;
 using Enoch.Domain.Services.User.Entities;
+using Enoch.Domain.Services.User.Queue;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,14 @@ namespace Enoch.Domain.Services.User
         private readonly IUserRepository _userRepository;
         private readonly INotification _notification;
         private readonly IUserFactory _userFactory;
+        private readonly IUserQueue _userQueue;
 
-        public UserService(IUserRepository userRepository, INotification notification, IUserFactory userFactory)
+        public UserService(IUserRepository userRepository, INotification notification, IUserFactory userFactory, IUserQueue userQueue)
         {
             _userRepository = userRepository;
             _notification = notification;
             _userFactory = userFactory;
+            _userQueue = userQueue;
         }
 
         public IEnumerable<UserDataDto> Get(out int total, int? page = null)
@@ -82,7 +85,8 @@ namespace Enoch.Domain.Services.User
 
                 var idUser = _userRepository.Post(userEntity);
 
-                _userFactory.SendQueue(userEntity);
+                if (!_userQueue.SendQueue(userEntity))
+                    return _notification.AddWithReturn<int>(_notification.GetNotifications());
 
                 transaction.Complete();
 

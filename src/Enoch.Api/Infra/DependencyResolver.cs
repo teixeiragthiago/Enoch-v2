@@ -6,6 +6,7 @@ using Enoch.CrossCutting.WebApi;
 using Enoch.Domain.Common;
 using Enoch.Domain.Services.Auth;
 using Enoch.Domain.Services.User;
+using Enoch.Domain.Services.User.Queue;
 using Enoch.Infra.Base;
 using Enoch.Infra.Context;
 using Enoch.Infra.User;
@@ -40,12 +41,18 @@ namespace Enoch.Api.Infra
             Factories(services);
             Services(services);
             Repositories(services);
+            Queues(services);
         }
 
         private static void Factories(IServiceCollection services)
         {
             services.AddScoped<IUserFactory, UserFactory>();
             services.AddScoped<DapperBaseRepository>();
+        }
+
+        private static void Queues(IServiceCollection services)
+        {
+            services.AddScoped<IUserQueue, UserQueue>();
         }
 
         private static void Services(IServiceCollection services)
