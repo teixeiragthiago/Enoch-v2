@@ -21,6 +21,8 @@ namespace Enoch.CrossCutting.Notification
             _notifications.Remove(notification);
 
             _notifications.Add(new DomainNotification(message));
+
+            LogWriter.LogWriter.WriteError(message);
         }
 
         public virtual string GetNotifications() => _notifications.FirstOrDefault()?.Value;
@@ -32,6 +34,8 @@ namespace Enoch.CrossCutting.Notification
             _notifications.Remove(notification);
 
             _notifications.Add(new DomainNotification(message));
+
+            LogWriter.LogWriter.WriteError(message);
 
             return default(T);
         }

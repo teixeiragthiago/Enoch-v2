@@ -1,3 +1,4 @@
+using dotenv.net;
 using Enoch.Api.Infra;
 using Enoch.CrossCutting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -25,6 +26,8 @@ namespace Enoch.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            DotEnv.Load();
+
             #region Cors
 
             services.AddSignalR();

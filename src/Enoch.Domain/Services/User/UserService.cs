@@ -16,7 +16,6 @@ namespace Enoch.Domain.Services.User
         private readonly INotification _notification;
         private readonly IUserFactory _userFactory;
 
-
         public UserService(IUserRepository userRepository, INotification notification, IUserFactory userFactory)
         {
             _userRepository = userRepository;
@@ -70,7 +69,7 @@ namespace Enoch.Domain.Services.User
 
                 Encryption.CreatePasswordHash(user.Password, out var passwordHash, out var passwordSalt);
 
-                var idUser = _userRepository.Post(new UserEntity
+                var userEntity = new UserEntity
                 {
                     Name = user.Name,
                     Email = user.Email,
@@ -79,7 +78,11 @@ namespace Enoch.Domain.Services.User
                     DateRegister = DateTime.Now,
                     PasswordHash = passwordHash,
                     PasswordSalt = passwordSalt
-                });
+                };
+
+                var idUser = _userRepository.Post(userEntity);
+
+                _userFactory.SendQueue(userEntity);
 
                 transaction.Complete();
 
