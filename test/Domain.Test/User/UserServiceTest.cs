@@ -3,6 +3,7 @@ using Enoch.CrossCutting.Notification;
 using Enoch.Domain.Services.User;
 using Enoch.Domain.Services.User.Dto;
 using Enoch.Domain.Services.User.Entities;
+using Enoch.Domain.Services.User.Queue;
 using Fixtures.Mapper;
 using Fixtures.User;
 using Moq;
@@ -20,6 +21,7 @@ namespace Domain.Tests.User
         private readonly Mock<IUserRepository> userRepository = new Mock<IUserRepository>();
         private readonly Mock<INotification> notification = new Mock<INotification>();
         private readonly Mock<IUserFactory> userFactory = new Mock<IUserFactory>();
+        private readonly Mock<IUserQueue> userQueue = new Mock<IUserQueue>();
         private readonly Mock<IMapper> mapper = new Mock<IMapper>();
 
         [Fact(DisplayName = "UserService, create user must return Success")]
@@ -33,8 +35,9 @@ namespace Domain.Tests.User
 
             userFactory.Setup(x => x.VerifyPassword(It.IsAny<string>())).Returns(true);
             userRepository.Setup(x => x.Post(It.IsAny<UserEntity>())).Returns(user.Id);
+            userQueue.Setup(x => x.SendQueue(It.IsAny<UserEntity>())).Returns(true);
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
 
             //Act
             var response = userService.Post(user);
@@ -57,8 +60,9 @@ namespace Domain.Tests.User
 
             userRepository.Setup(x => x.Post(UserFixtureEntity.CreateInvalidAdmin())).Returns(idResult);
             userFactory.Setup(x => x.VerifyPassword(It.IsAny<string>())).Returns(false);
+            userQueue.Setup(x => x.SendQueue(It.IsAny<UserEntity>())).Returns(false);
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
 
             //Act
             var response = userService.Post(invalidUser);
@@ -83,7 +87,7 @@ namespace Domain.Tests.User
             userRepository.Setup(x => x.First(x => x.Id == user.Id)).Returns(userEntity);
             userFactory.Setup(x => x.VerifyPassword(It.IsAny<string>())).Returns(true);
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
 
             //Act
             var response = userService.Put(user);
@@ -107,7 +111,7 @@ namespace Domain.Tests.User
             userRepository.Setup(x => x.First(x => x.Id == user.Id)).Returns(userEntity);
             userFactory.Setup(x => x.VerifyPassword("senha")).Returns(false);
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
 
             //Act
             var response = userService.Put(user);
@@ -129,7 +133,7 @@ namespace Domain.Tests.User
             userRepository.Setup(x => x.First(MoqHelper.IsExpression<UserEntity>(x => x.Id == user.Id))).Returns(userEntity);
             userRepository.Setup(x => x.Delete(It.IsAny<UserEntity>()));
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
 
             //Act
             var response = userService.Delete(user.Id);
