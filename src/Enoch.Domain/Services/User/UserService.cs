@@ -7,6 +7,7 @@ using Enoch.Domain.Services.User.Queue;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 
 namespace Enoch.Domain.Services.User
@@ -83,10 +84,11 @@ namespace Enoch.Domain.Services.User
                     PasswordSalt = passwordSalt
                 };
 
-                var idUser = _userRepository.Post(userEntity);
+                var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
+                if (!sqsQueueResponse.Result)
+                    return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
 
-                if (!_userQueue.SendQueue(userEntity))
-                    return _notification.AddWithReturn<int>(_notification.GetNotifications());
+                var idUser = _userRepository.Post(userEntity);
 
                 transaction.Complete();
 
@@ -127,6 +129,8 @@ namespace Enoch.Domain.Services.User
         }
         public bool Delete(int id)
         {
+            var message = _userQueue.ReceiveSqsMessage();
+
             var user = _userRepository.First(x => x.Id == id);
             if (user == null)
                 return _notification.AddWithReturn<bool>("Ops.. parece que o usuário informado não pode ser encontrado!");
@@ -159,55 +163,16 @@ namespace Enoch.Domain.Services.User
             return true;
         }
 
-        //public int Post(UserRegisterDto entity)
-        //{
-        //    if (entity == null)
-        //        return _notification.AddWithReturn<int>("Dados não informados para realizar cadastro");
-
-        //    if (!entity.isValid(_notification))
-        //        return default(int);
-
-        //    var user = _userRepository.GetByEmail(entity.Email);
-        //    if (user != null)
-        //        return _notification.AddWithReturn<int>("E-mail já possui cadastro no sistema");
-
-        //    var program = _programsRepository.GetByName(entity.Software);
-        //    if (program == null)
-        //        return _notification.AddWithReturn<int>("Programa informado para cadastro não encontrado!");
-
-        //    var code = GenerateCode(Guid.NewGuid().ToString());
-        //    var dateExec = DateTime.Now;
-
-        //    byte[] Image = entity.Image.CastBase64();
-
-        //    var idUser = _userRepository.Post(new UserEntity
-        //    {
-        //        Name = entity.Name,
-        //        Email = entity.Email,
-        //        Telephone = FormatTelephone(entity.Telephone),
-        //        DateRegister = dateExec,
-        //        Image = Image,
-        //        PendingConfirm = true,
-        //        Key = code,
-        //        ExpirationKey = dateExec.AddMinutes(30)
-        //    });
-
-        //    _userProgramsRepository.Post(new UserProgramsEntity
-        //    {
-        //        Id_User = idUser,
-        //        Id_Program = program.Id,
-        //        Blocked = false
-        //    });
-
-        //    CreateLog($"Usuário foi cadastro e vinculado ao sistema: {program.Name}", idUser);
-
-        //    var email = _emailFactory.Register(entity.Software, entity.Name, $"{program.Url}/confirm/{code}");
-
-        //    _email.Send(_parameters.Data.Mail.From, _parameters.Data.Mail.PassWord, entity.Email,
-        //        $"Confirmação de cadastro no {program.Name}", email);
-
-        //    return idUser;
-        //}
-
+        public void RemoveSqsQueue()
+        {
+            try
+            { 
+                _userQueue.DeleteSqsMessage();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Erro: {e.Message}");
+            }
+        }
     }
 }

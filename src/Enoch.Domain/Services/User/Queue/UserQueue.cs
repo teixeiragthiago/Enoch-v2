@@ -1,4 +1,7 @@
-﻿using Enoch.CrossCutting.LogWriter;
+﻿using Amazon.SQS;
+using Amazon.SQS.Model;
+using Enoch.CrossCutting.AwsSQS;
+using Enoch.CrossCutting.LogWriter;
 using Enoch.CrossCutting.Notification;
 using Enoch.CrossCutting.RabbitMQConfig;
 using Enoch.Domain.Services.User.Entities;
@@ -16,11 +19,15 @@ namespace Enoch.Domain.Services.User.Queue
     {
         private readonly INotification _notification;
         private IConnection _connection;
+        private readonly IAmazonSQS _sqsAmazon;
         private readonly string _queueName = RabbitMQConfig.GetData().QueueName;
+        private readonly int _maxMessages = 1;
+        private readonly int _waitTime = 2;
 
-        public UserQueue(INotification notification)
+        public UserQueue(INotification notification, IAmazonSQS sqsAmazon)
         {
             _notification = notification;
+            _sqsAmazon = sqsAmazon;
         }
 
         public bool SendQueue(UserEntity user)
@@ -69,6 +76,61 @@ namespace Enoch.Domain.Services.User.Queue
             CreateConnection();
 
             return _connection != null;
+        }
+
+        public async Task<bool> SendSqsMessage(UserEntity user)
+        {
+            try
+            {
+                var messageQueue = JsonConvert.SerializeObject(user);
+                var messageRequest = new SendMessageRequest(AwsSQSconfig.GetSqsConfig().QueueURL, messageQueue);
+
+                await _sqsAmazon.SendMessageAsync(messageRequest);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                LogWriter.WriteError($"Erro ao tentar enviar mensagem para a fila {_queueName} do SQS : {e.Message}");
+                return false;
+            }
+        }
+
+        public async Task<ReceiveMessageResponse> ReceiveSqsMessage()
+        {
+            try
+            {
+                var message = await _sqsAmazon.ReceiveMessageAsync(new ReceiveMessageRequest
+                {
+                    QueueUrl = AwsSQSconfig.GetSqsConfig().QueueURL,
+                    MaxNumberOfMessages = _maxMessages,
+                    WaitTimeSeconds = _waitTime,
+                });
+
+                return message;
+            }
+            catch (Exception e)
+            {
+                LogWriter.WriteError($"Erro: {e.Message}");
+                return null;
+            }
+        }
+
+        public async Task<bool> DeleteSqsMessage()
+        {
+            try
+            {
+                var message = ReceiveSqsMessage();
+                if (message != null)
+                    await _sqsAmazon.DeleteMessageAsync(AwsSQSconfig.GetSqsConfig().QueueURL, message.Result.Messages.FirstOrDefault()?.ReceiptHandle);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                LogWriter.WriteError($"Erro: {e.Message}");
+                return false;
+            }
         }
     }
 }

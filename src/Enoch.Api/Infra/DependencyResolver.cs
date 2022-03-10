@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Amazon;
+using Amazon.SQS;
+using AutoMapper;
 using CrossCutting.Email;
 using Enoch.CrossCutting;
 using Enoch.CrossCutting.Notification;
@@ -37,6 +39,7 @@ namespace Enoch.Api.Infra
             services.AddScoped<IWebApi, WebApi>();
             services.AddSingleton<HttpClient>();
             services.AddDbContext<DataContext>();
+
 
             Factories(services);
             Services(services);

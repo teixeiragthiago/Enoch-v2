@@ -13,8 +13,6 @@ namespace Enoch.Domain.Services.User
     public class UserFactory : IUserFactory
     {
         private readonly INotification _notification;
-        private IConnection _connection;
-        private readonly string _queueName = RabbitMQConfig.GetData().QueueName;
 
         public UserFactory(INotification notification)
         {

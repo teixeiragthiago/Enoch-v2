@@ -1,6 +1,11 @@
+using Amazon;
+using Amazon.Extensions.NETCore.Setup;
+using Amazon.Runtime;
+using Amazon.SQS;
 using dotenv.net;
 using Enoch.Api.Infra;
 using Enoch.CrossCutting;
+using Enoch.CrossCutting.AwsSQS;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -49,7 +54,18 @@ namespace Enoch.Api
 
             #region Token
             //Token(services);
-            #endregion 
+            #endregion
+
+            var cred = new BasicAWSCredentials(Environment.GetEnvironmentVariable("AWS_ACCESSKEY"), Environment.GetEnvironmentVariable("AWS_SECRET"));
+
+            services.AddDefaultAWSOptions(new AWSOptions
+            {
+                Region = RegionEndpoint.SAEast1,
+                Profile = Environment.GetEnvironmentVariable("AWS_PROFILE"),
+                Credentials = cred,
+            });
+
+            services.AddAWSService<IAmazonSQS>();
 
             services.AddHttpClient();
 
