@@ -1,4 +1,5 @@
 ﻿using Enoch.CrossCutting;
+using Enoch.CrossCutting.AwsS3;
 using Enoch.CrossCutting.Notification;
 using Enoch.Domain.Services.User.Common;
 using Enoch.Domain.Services.User.Dto;
@@ -18,13 +19,15 @@ namespace Enoch.Domain.Services.User
         private readonly INotification _notification;
         private readonly IUserFactory _userFactory;
         private readonly IUserQueue _userQueue;
+        private readonly AwsStorage _awsS3;
 
-        public UserService(IUserRepository userRepository, INotification notification, IUserFactory userFactory, IUserQueue userQueue)
+        public UserService(IUserRepository userRepository, INotification notification, IUserFactory userFactory, IUserQueue userQueue, AwsStorage awsS3)
         {
             _userRepository = userRepository;
             _notification = notification;
             _userFactory = userFactory;
             _userQueue = userQueue;
+            _awsS3 = awsS3;
         }
 
         public IEnumerable<UserDataDto> Get(out int total, int? page = null)
@@ -84,11 +87,18 @@ namespace Enoch.Domain.Services.User
                     PasswordSalt = passwordSalt
                 };
 
-                var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
-                if (!sqsQueueResponse.Result)
-                    return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
 
                 var idUser = _userRepository.Post(userEntity);
+
+                if(idUser > 0)
+                {
+                    if (!string.IsNullOrEmpty(user.Image))
+                        _ = UploadFile(user.Image);
+
+                    var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
+                    if (!sqsQueueResponse.Result)
+                        return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
+                }
 
                 transaction.Complete();
 
@@ -112,7 +122,6 @@ namespace Enoch.Domain.Services.User
                     var userEmail = _userRepository.First(x => x.Email.ToLower().Trim() == user.Email.ToLower().Trim());
                     if (userEmail != null)
                         return _notification.AddWithReturn<bool>("Ops.. o e-mail informado já possui cadastro!");
-
                 }
 
                 userData.Name = user.Name;
@@ -129,8 +138,6 @@ namespace Enoch.Domain.Services.User
         }
         public bool Delete(int id)
         {
-            var message = _userQueue.ReceiveSqsMessage();
-
             var user = _userRepository.First(x => x.Id == id);
             if (user == null)
                 return _notification.AddWithReturn<bool>("Ops.. parece que o usuário informado não pode ser encontrado!");
@@ -163,16 +170,25 @@ namespace Enoch.Domain.Services.User
             return true;
         }
 
-        public void RemoveSqsQueue()
+        public bool RemoveSqsQueue()
         {
-            try
-            { 
-                _userQueue.DeleteSqsMessage();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Erro: {e.Message}");
-            }
+            if (!_userQueue.DeleteSqsMessage().Result)
+                return _notification.AddWithReturn<bool>("Ops.. houve um erro ao tentar remover a mensagem da fila do SQS!");
+            else 
+                return true;
+        }
+
+        public async Task<bool> UploadFile(string file)
+        {
+            byte[] fileByte = file.CastBase64();
+
+            var bucketName = Environment.GetEnvironmentVariable("AWS_BUCKET");
+            if (string.IsNullOrEmpty(bucketName))
+                return _notification.AddWithReturn<bool>("Ops.. parece que o Bucket não foi informado!");
+
+            await _awsS3.UploadFileAsync(fileByte, Guid.NewGuid().ToString(), bucketName);
+
+            return true;
         }
     }
 }

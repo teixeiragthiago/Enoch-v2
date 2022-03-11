@@ -83,7 +83,7 @@ namespace Enoch.Domain.Services.User.Queue
             try
             {
                 var messageQueue = JsonConvert.SerializeObject(user);
-                var messageRequest = new SendMessageRequest(AwsSQSconfig.GetSqsConfig().QueueURL, messageQueue);
+                var messageRequest = new SendMessageRequest(AwsConfig.GetSqsConfig().SqsConfig.QueueURL, messageQueue);
 
                 await _sqsAmazon.SendMessageAsync(messageRequest);
 
@@ -102,7 +102,7 @@ namespace Enoch.Domain.Services.User.Queue
             {
                 var message = await _sqsAmazon.ReceiveMessageAsync(new ReceiveMessageRequest
                 {
-                    QueueUrl = AwsSQSconfig.GetSqsConfig().QueueURL,
+                    QueueUrl = AwsConfig.GetSqsConfig().SqsConfig.QueueURL,
                     MaxNumberOfMessages = _maxMessages,
                     WaitTimeSeconds = _waitTime,
                 });
@@ -122,7 +122,7 @@ namespace Enoch.Domain.Services.User.Queue
             {
                 var message = ReceiveSqsMessage();
                 if (message != null)
-                    await _sqsAmazon.DeleteMessageAsync(AwsSQSconfig.GetSqsConfig().QueueURL, message.Result.Messages.FirstOrDefault()?.ReceiptHandle);
+                    await _sqsAmazon.DeleteMessageAsync(AwsConfig.GetSqsConfig().SqsConfig.QueueURL, message.Result.Messages.FirstOrDefault()?.ReceiptHandle);
 
                 return true;
             }

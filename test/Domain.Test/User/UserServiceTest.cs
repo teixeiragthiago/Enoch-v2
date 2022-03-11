@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Domain.Tests.User
@@ -36,6 +37,7 @@ namespace Domain.Tests.User
             userFactory.Setup(x => x.VerifyPassword(It.IsAny<string>())).Returns(true);
             userRepository.Setup(x => x.Post(It.IsAny<UserEntity>())).Returns(user.Id);
             userQueue.Setup(x => x.SendQueue(It.IsAny<UserEntity>())).Returns(true);
+            userQueue.Setup(x => x.SendSqsMessage(It.IsAny<UserEntity>())).ReturnsAsync(true);
 
             var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
 

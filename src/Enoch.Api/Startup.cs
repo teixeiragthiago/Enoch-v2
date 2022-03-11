@@ -56,16 +56,16 @@ namespace Enoch.Api
             //Token(services);
             #endregion
 
-            var cred = new BasicAWSCredentials(Environment.GetEnvironmentVariable("AWS_ACCESSKEY"), Environment.GetEnvironmentVariable("AWS_SECRET"));
+            //var cred = new BasicAWSCredentials(Environment.GetEnvironmentVariable("AWS_ACCESSKEY"), Environment.GetEnvironmentVariable("AWS_SECRET"));
 
-            services.AddDefaultAWSOptions(new AWSOptions
-            {
-                Region = RegionEndpoint.SAEast1,
-                Profile = Environment.GetEnvironmentVariable("AWS_PROFILE"),
-                Credentials = cred,
-            });
+            //services.AddDefaultAWSOptions(new AWSOptions
+            //{
+            //    Region = RegionEndpoint.SAEast1,
+            //    Profile = Environment.GetEnvironmentVariable("AWS_PROFILE"),
+            //    Credentials = cred,
+            //});
 
-            services.AddAWSService<IAmazonSQS>();
+            //services.AddAWSService<IAmazonSQS>();
 
             services.AddHttpClient();
 

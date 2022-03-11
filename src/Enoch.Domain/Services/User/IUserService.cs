@@ -11,6 +11,6 @@ namespace Enoch.Domain.Services.User
         bool Put(UserDto user);
         bool Delete(int id);
         bool PutPassword(NewPasswordDto password);
-        void RemoveSqsQueue();
+        bool RemoveSqsQueue();
     }
 }
