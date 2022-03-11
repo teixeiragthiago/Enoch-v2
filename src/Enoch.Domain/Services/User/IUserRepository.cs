@@ -6,5 +6,6 @@ namespace Enoch.Domain.Services.User
     public interface IUserRepository : IBaseRepository<UserEntity>
     {
         void PutPassword(int idUser, byte[] passwordHash, byte[] passwordSalt);
+        void PutImagePath(int idUser, string imagePath);
     }
 }

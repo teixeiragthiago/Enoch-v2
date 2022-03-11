@@ -20,6 +20,7 @@ namespace Enoch.Domain.Services.User
         private readonly IUserFactory _userFactory;
         private readonly IUserQueue _userQueue;
         private readonly AwsStorage _awsS3;
+        private readonly string _bucketName = Environment.GetEnvironmentVariable("AWS_BUCKET");
 
         public UserService(IUserRepository userRepository, INotification notification, IUserFactory userFactory, IUserQueue userQueue, AwsStorage awsS3)
         {
@@ -41,7 +42,8 @@ namespace Enoch.Domain.Services.User
                 Email = x.Email,
                 DateRegister = x.DateRegister,
                 Profile = x.Profile,
-                Status = x.Status
+                Status = x.Status,
+                Image = GetUserImage(x.ImagePath)
             });
         }
         public UserDataDto GetById(int id)
@@ -56,7 +58,8 @@ namespace Enoch.Domain.Services.User
                 Email = user.Email,
                 DateRegister = user.DateRegister,
                 Profile = user.Profile,
-                Status = user.Status
+                Status = user.Status,
+                Image = GetUserImage(user.ImagePath)
             };
         }
 
@@ -87,17 +90,23 @@ namespace Enoch.Domain.Services.User
                     PasswordSalt = passwordSalt
                 };
 
-
                 var idUser = _userRepository.Post(userEntity);
 
+                var filePath = string.Empty;
                 if(idUser > 0)
                 {
-                    if (!string.IsNullOrEmpty(user.Image))
-                        _ = UploadFile(user.Image);
+                    if (!string.IsNullOrEmpty(user.Image) && !string.IsNullOrEmpty(user.ImageFormat))
+                    {
+                        filePath = $"{Guid.NewGuid()}.{user.ImageFormat}";
+
+                        _ = UploadFile(user.Image, filePath);
+                    }
 
                     var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
                     if (!sqsQueueResponse.Result)
                         return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
+
+                    _userRepository.PutImagePath(idUser, filePath);
                 }
 
                 transaction.Complete();
@@ -144,6 +153,8 @@ namespace Enoch.Domain.Services.User
 
             _userRepository.Delete(user);
 
+            _ = _awsS3.Delete(user.ImagePath, _bucketName);
+
             return true;
 
         }
@@ -178,7 +189,7 @@ namespace Enoch.Domain.Services.User
                 return true;
         }
 
-        public async Task<bool> UploadFile(string file)
+        public async Task<bool> UploadFile(string file, string key)
         {
             byte[] fileByte = file.CastBase64();
 
@@ -186,9 +197,20 @@ namespace Enoch.Domain.Services.User
             if (string.IsNullOrEmpty(bucketName))
                 return _notification.AddWithReturn<bool>("Ops.. parece que o Bucket não foi informado!");
 
-            await _awsS3.UploadFileAsync(fileByte, Guid.NewGuid().ToString(), bucketName);
+            await _awsS3.UploadFileAsync(fileByte, key, bucketName);
 
             return true;
         }
+
+        private string GetUserImage(string keyName)
+        {
+            if (string.IsNullOrEmpty(_bucketName))
+                return string.Empty;
+
+            var url = _awsS3.UrlFile(keyName, _bucketName);
+
+            return string.IsNullOrEmpty(url) ? string.Empty : url;
+        }
+
     }
 }

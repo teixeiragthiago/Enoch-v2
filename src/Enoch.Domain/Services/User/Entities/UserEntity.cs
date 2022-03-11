@@ -16,7 +16,7 @@ namespace Enoch.Domain.Services.User.Entities
         public UserEnum.Status Status { get; set; }
         public byte[] PasswordSalt { get; set; }
         public byte[] PasswordHash { get; set; }
-        public byte[] Image { get; set; }
+        public string ImagePath { get; set; }
         public DateTime DateRegister { get; set; }
     }
 }

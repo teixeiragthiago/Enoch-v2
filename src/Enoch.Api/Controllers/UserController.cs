@@ -57,10 +57,10 @@ namespace Enoch.Api.Controllers
             return Ok(userData);
         }
 
-        [HttpDelete("remove-queue")]
-        public IActionResult Delete()
+        [HttpDelete]
+        public IActionResult Delete(int id)
         {
-            var response = _userService.RemoveSqsQueue();
+            var response = _userService.Delete(id);
             if(!response)
                 return BadRequest(_notification.GetNotifications());
 

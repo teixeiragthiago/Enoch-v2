@@ -12,6 +12,20 @@ namespace Enoch.Infra.User
         {
         }
 
+        public void PutImagePath(int idUser, string imagePath)
+        {
+            using (var context = new DataContext())
+            {
+                var user = context.User.FirstOrDefault(x => x.Id == idUser);
+
+                user.ImagePath = imagePath;
+
+                context.User.Update(user);
+
+                context.SaveChanges();
+            }
+        }
+
         public void PutPassword(int idUser, byte[] passwordHash, byte[] passwordSalt)
         {
             using (var context = new DataContext())

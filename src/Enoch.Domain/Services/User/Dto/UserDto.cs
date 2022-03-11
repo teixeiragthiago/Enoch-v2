@@ -14,6 +14,7 @@ namespace Enoch.Domain.Services.User.Dto
         public UserEnum.Status Status { get; set; }
         public string Password { get; set; }
         public string Image { get; set; }
+        public string ImageFormat { get; set; }
         public DateTime DateRegister { get; set; }
 
         public bool IsValid(INotification notification)
