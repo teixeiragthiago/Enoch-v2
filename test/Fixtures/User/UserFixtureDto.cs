@@ -16,7 +16,9 @@ namespace Fixtures.User
                 Email = "thiago@cloudmed.io",
                 Status = UserEnum.Status.Enabled,
                 Profile = UserEnum.Profile.Adminstrator,
-                Password = "abR3Ir#l0101@"
+                Password = "abR3Ir#l0101@",
+                ImageFormat = string.Empty,
+                Image = string.Empty
             };
         }
 
@@ -31,7 +33,9 @@ namespace Fixtures.User
                 Email = email,
                 Status = UserEnum.Status.Enabled,
                 Profile = UserEnum.Profile.Adminstrator,
-                Password = "Thiago123"
+                Password = "Thiago123",
+                ImageFormat = "jpg",
+                Image = "imagem"
             };
         }
 
@@ -44,7 +48,9 @@ namespace Fixtures.User
                 Email = "thiago.net",
                 Status = UserEnum.Status.Enabled,
                 Profile = UserEnum.Profile.Adminstrator,
-                Password = ""
+                Password = "",
+                ImageFormat = "",
+                Image = ""
             };
         }
 
@@ -57,7 +63,9 @@ namespace Fixtures.User
                 Email = "thiago@cloudmed.io",
                 Status = UserEnum.Status.Enabled,
                 Profile = UserEnum.Profile.User,
-                Password = "Thiago123"
+                Password = "Thiago123",
+                ImageFormat = "jpg",
+                Image = "imagem"
             };
         }
 

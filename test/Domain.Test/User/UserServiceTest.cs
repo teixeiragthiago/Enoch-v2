@@ -1,4 +1,7 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using Amazon.S3.Transfer;
+using AutoMapper;
+using Enoch.CrossCutting.AwsS3;
 using Enoch.CrossCutting.Notification;
 using Enoch.Domain.Services.User;
 using Enoch.Domain.Services.User.Dto;
@@ -10,6 +13,7 @@ using Moq;
 using MoqExpression;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -24,6 +28,10 @@ namespace Domain.Tests.User
         private readonly Mock<IUserFactory> userFactory = new Mock<IUserFactory>();
         private readonly Mock<IUserQueue> userQueue = new Mock<IUserQueue>();
         private readonly Mock<IMapper> mapper = new Mock<IMapper>();
+        private readonly Mock<IAmazonS3> amazonS3 = new Mock<IAmazonS3>();
+        private readonly Mock<AwsStorage> awsStorage = new Mock<AwsStorage>(new Mock<IAmazonS3>().Object);
+        private readonly Mock<TransferUtility> transferUtility = new Mock<TransferUtility>(new Mock<IAmazonS3>().Object);
+
 
         [Fact(DisplayName = "UserService, create user must return Success")]
         [Trait("Domain", "User Service")]
@@ -38,8 +46,10 @@ namespace Domain.Tests.User
             userRepository.Setup(x => x.Post(It.IsAny<UserEntity>())).Returns(user.Id);
             userQueue.Setup(x => x.SendQueue(It.IsAny<UserEntity>())).Returns(true);
             userQueue.Setup(x => x.SendSqsMessage(It.IsAny<UserEntity>())).ReturnsAsync(true);
+            //awsStorage.Setup(x => x.UploadFileAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+            //transferUtility.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>());
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object, awsStorage.Object);
 
             //Act
             var response = userService.Post(user);
@@ -64,7 +74,7 @@ namespace Domain.Tests.User
             userFactory.Setup(x => x.VerifyPassword(It.IsAny<string>())).Returns(false);
             userQueue.Setup(x => x.SendQueue(It.IsAny<UserEntity>())).Returns(false);
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object, awsStorage.Object);
 
             //Act
             var response = userService.Post(invalidUser);
@@ -89,7 +99,7 @@ namespace Domain.Tests.User
             userRepository.Setup(x => x.First(x => x.Id == user.Id)).Returns(userEntity);
             userFactory.Setup(x => x.VerifyPassword(It.IsAny<string>())).Returns(true);
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object, awsStorage.Object);
 
             //Act
             var response = userService.Put(user);
@@ -113,7 +123,7 @@ namespace Domain.Tests.User
             userRepository.Setup(x => x.First(x => x.Id == user.Id)).Returns(userEntity);
             userFactory.Setup(x => x.VerifyPassword("senha")).Returns(false);
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object, awsStorage.Object);
 
             //Act
             var response = userService.Put(user);
@@ -135,7 +145,7 @@ namespace Domain.Tests.User
             userRepository.Setup(x => x.First(MoqHelper.IsExpression<UserEntity>(x => x.Id == user.Id))).Returns(userEntity);
             userRepository.Setup(x => x.Delete(It.IsAny<UserEntity>()));
 
-            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object);
+            var userService = new UserService(userRepository.Object, notification.Object, userFactory.Object, userQueue.Object, awsStorage.Object);
 
             //Act
             var response = userService.Delete(user.Id);
