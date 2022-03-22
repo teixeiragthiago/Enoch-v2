@@ -68,7 +68,7 @@ namespace Enoch.Domain.Services.User
             if (!user.IsValid(_notification))
                 return _notification.AddWithReturn<int>(_notification.GetNotifications());
 
-            using (var  transaction = new TransactionScope())
+            using (var transaction = new TransactionScope())
             {
                 var existingEmail = _userRepository.First(x => x.Email.LowerAndTrim() == user.Email.LowerAndTrim());
                 if (existingEmail != null)
@@ -93,23 +93,27 @@ namespace Enoch.Domain.Services.User
                 var idUser = _userRepository.Post(userEntity);
 
                 var filePath = string.Empty;
-                if(idUser > 0)
+                if (idUser > 0)
                 {
-                    if (!string.IsNullOrEmpty(user.Image) && !string.IsNullOrEmpty(user.ImageFormat))
-                    {
-                        filePath = $"{Guid.NewGuid()}.{user.ImageFormat}";
-
-                        _ = UploadFile(user.Image, filePath);
-                    }
-
-                    var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
-                    if (!sqsQueueResponse.Result)
-                        return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
-
                     _userRepository.PutImagePath(idUser, filePath);
+
+                    transaction.Complete();
                 }
 
-                transaction.Complete();
+                if (!string.IsNullOrEmpty(user.Image) && !string.IsNullOrEmpty(user.ImageFormat))
+                {
+                    filePath = $"{Guid.NewGuid()}.{user.ImageFormat}";
+
+                    _ = UploadFile(user.Image, filePath);
+                }
+
+                var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
+                if (!sqsQueueResponse.Result)
+                    return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
+
+                var rabbitMqQueue = _userQueue.SendQueue(userEntity);
+                if (!rabbitMqQueue)
+                    return _notification.AddWithReturn<int>(_notification.GetNotifications());
 
                 return idUser;
             }
@@ -126,7 +130,7 @@ namespace Enoch.Domain.Services.User
                 if (userData == null)
                     return _notification.AddWithReturn<bool>("Ops.. o usuário informado não pode ser encontrado!");
 
-                if(userData.Email.ToLower().Trim() != user.Email.ToLower().Trim())
+                if (userData.Email.ToLower().Trim() != user.Email.ToLower().Trim())
                 {
                     var userEmail = _userRepository.First(x => x.Email.ToLower().Trim() == user.Email.ToLower().Trim());
                     if (userEmail != null)
@@ -140,7 +144,7 @@ namespace Enoch.Domain.Services.User
 
                 _userRepository.Put(userData);
 
-                transaction.Complete();                
+                transaction.Complete();
             }
 
             return true;
@@ -185,7 +189,7 @@ namespace Enoch.Domain.Services.User
         {
             if (!_userQueue.DeleteSqsMessage().Result)
                 return _notification.AddWithReturn<bool>("Ops.. houve um erro ao tentar remover a mensagem da fila do SQS!");
-            else 
+            else
                 return true;
         }
 

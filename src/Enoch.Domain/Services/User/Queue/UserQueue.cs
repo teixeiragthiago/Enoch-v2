@@ -47,7 +47,7 @@ namespace Enoch.Domain.Services.User.Queue
                 }
             }
             else
-                return _notification.AddWithReturn<bool>("Não foi possível encontrar conexão com o RabbitMQ!");
+                return _notification.AddWithReturn<bool>($"Não foi possível encontrar conexão com o RabbitMQ!");
         }
 
         private void CreateConnection()
@@ -58,7 +58,8 @@ namespace Enoch.Domain.Services.User.Queue
 
                 var factory = new ConnectionFactory
                 {
-                    HostName = rabbitConfig.Hostname
+                    HostName = rabbitConfig.Hostname,
+                    Port = int.Parse(rabbitConfig.Port)
                 };
 
                 _connection = factory.CreateConnection();

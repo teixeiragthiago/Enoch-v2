@@ -12,6 +12,7 @@ namespace Enoch.CrossCutting.RabbitMQConfig
         private static readonly string _password = Environment.GetEnvironmentVariable("");
         private static readonly string _queueName = Environment.GetEnvironmentVariable("RABBITMQ_QUEUE_NAME");
         private static readonly string _username = Environment.GetEnvironmentVariable("");
+        private static readonly string _port = Environment.GetEnvironmentVariable("RABBITMQ_PORT");
 
         public static RabbitMQConfigData GetData()
         {
@@ -20,7 +21,8 @@ namespace Enoch.CrossCutting.RabbitMQConfig
                 Hostname = _hostname,
                 Password = _password,
                 QueueName = _queueName,
-                UserName = _username
+                UserName = _username,
+                Port = _port
             };
         }
     }
@@ -31,5 +33,6 @@ namespace Enoch.CrossCutting.RabbitMQConfig
         public string Password { get; set; }
         public string QueueName { get; set; }
         public string UserName { get; set; }
+        public string Port { get; set; }
     }
 }

@@ -1,15 +1,12 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+# Stage 1
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-ENV ASPNETCORE_URLS=http://+:80
-# ENV ASPNETCORE_URLS=http://+:80;https://+:443
-ENV ASPNETCORE_ENVIRONMENT=Development
-# RUN dotnet dev-certs https --trust
-# ENV ASPNETCORE_Kestrel__Certificates__Default__Password: "AS78xOi3#"
-# ENV ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/aspnetapp.pfx"
-
+# Stage 2
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["src/Enoch.Api/Enoch.Api.csproj", "src/Enoch.Api/"]
@@ -21,14 +18,12 @@ COPY . .
 WORKDIR "/src/src/Enoch.Api"
 RUN dotnet build "Enoch.Api.csproj" -c Release -o /app/build
 
+# Stage 3
 FROM build AS publish
 RUN dotnet publish "Enoch.Api.csproj" -c Release -o /app/publish
 
+# Stage 4 - Final
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-#Método padrão .NET
 ENTRYPOINT ["dotnet", "Enoch.Api.dll"]
-
-# Opção utilizada pelo Heroku
-# CMD ASPNETCORE_URLS=http://*:$PORT dotnet Enoch.Api.dll
