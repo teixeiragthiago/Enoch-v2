@@ -17,6 +17,9 @@ COPY ["src/Enoch.Infra/Enoch.Infra.csproj", "src/Enoch.Infra/"]
 COPY ["src/Enoch.Domain/Enoch.Domain.csproj", "src/Enoch.Domain/"]
 COPY ["src/Enoch.CrossCutting/Enoch.CrossCutting.csproj", "src/Enoch.CrossCutting/"]
 RUN dotnet restore "src/Enoch.Api/Enoch.Api.csproj"
+RUN dotnet restore "src/Enoch.Infra/Enoch.Infra.csproj"
+RUN dotnet restore "src/Enoch.Domain/Enoch.Domain.csproj"
+RUN dotnet restore "src/Enoch.CrossCutting/Enoch.CrossCutting.csproj"
 COPY . .
 WORKDIR "/src/src/Enoch.Api"
 RUN dotnet build "Enoch.Api.csproj" -c Release -o /app/build

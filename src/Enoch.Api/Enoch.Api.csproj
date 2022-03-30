@@ -8,6 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="5.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="5.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="5.0.0" />
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.1" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.8.7" />

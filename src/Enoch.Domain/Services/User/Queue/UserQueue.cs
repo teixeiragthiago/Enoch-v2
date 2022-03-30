@@ -59,7 +59,9 @@ namespace Enoch.Domain.Services.User.Queue
                 var factory = new ConnectionFactory
                 {
                     HostName = rabbitConfig.Hostname,
-                    Port = int.Parse(rabbitConfig.Port)
+                    Port = int.Parse(rabbitConfig.Port),
+                    UserName = rabbitConfig.UserName,
+                    Password = rabbitConfig.Password
                 };
 
                 _connection = factory.CreateConnection();

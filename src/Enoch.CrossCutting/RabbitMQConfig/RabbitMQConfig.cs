@@ -9,9 +9,9 @@ namespace Enoch.CrossCutting.RabbitMQConfig
     public static class RabbitMQConfig
     {
         private static readonly string _hostname = Environment.GetEnvironmentVariable("RABBITMQ_HOSTNAME");
-        private static readonly string _password = Environment.GetEnvironmentVariable("");
+        private static readonly string _password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
         private static readonly string _queueName = Environment.GetEnvironmentVariable("RABBITMQ_QUEUE_NAME");
-        private static readonly string _username = Environment.GetEnvironmentVariable("");
+        private static readonly string _username = Environment.GetEnvironmentVariable("RABBITMQ_USER");
         private static readonly string _port = Environment.GetEnvironmentVariable("RABBITMQ_PORT");
 
         public static RabbitMQConfigData GetData()

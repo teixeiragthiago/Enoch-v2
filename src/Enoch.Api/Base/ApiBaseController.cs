@@ -14,12 +14,12 @@ namespace Enoch.Api.Base
     [EnableCors("SiteCorsPolicy")]
     public class ApiBaseController : Controller
     {
-        [AllowAnonymous]
-        [HttpGet("ping")]
-        public IActionResult Ping()
-        {
-            var myName = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
-            return Ok($"{DateTime.Now}, {myName} it's alive!");
-        }
+        //[AllowAnonymous]
+        //[HttpGet("ping")]
+        //public IActionResult Ping()
+        //{
+        //    var myName = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location);
+        //    return Ok($"{DateTime.Now}, {myName} it's alive!");
+        //}
     }
 }

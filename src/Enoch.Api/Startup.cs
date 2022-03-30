@@ -4,19 +4,24 @@ using Amazon.Runtime;
 using Amazon.SQS;
 using dotenv.net;
 using Enoch.Api.Infra;
+using Enoch.Api.Infra.HealthChecks;
 using Enoch.CrossCutting;
 using Enoch.CrossCutting.AwsSQS;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
+using System.Net.Mime;
 using System.Text;
+using System.Text.Json;
 
 namespace Enoch.Api
 {
@@ -42,7 +47,7 @@ namespace Enoch.Api
                 options.AddPolicy("SiteCorsPolicy", builder => builder
                     .AllowAnyMethod()
                     .AllowAnyHeader()
-                    .SetIsOriginAllowed(origin => true) 
+                    .SetIsOriginAllowed(origin => true)
                     .AllowCredentials());
             });
 
@@ -72,7 +77,11 @@ namespace Enoch.Api
             services.AddControllers();
 
             services.Register();
+
+            services.ConfigureHealthChecks();
         }
+
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -109,6 +118,8 @@ namespace Enoch.Api
             {
                 endpoints.MapControllers();
             });
+
+            UseHealthChecks(app);
         }
 
         public void Swagger(IServiceCollection services)
@@ -130,6 +141,11 @@ namespace Enoch.Api
                         License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://github.com/teixeiragthiago") }
                     });
             });
+        }
+
+        public void UseHealthChecks(IApplicationBuilder app)
+        {
+            app.ApiHealthCheck();
         }
 
         public void Token(IServiceCollection services)

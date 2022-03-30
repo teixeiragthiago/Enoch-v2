@@ -100,20 +100,22 @@ namespace Enoch.Domain.Services.User
                     transaction.Complete();
                 }
 
-                if (!string.IsNullOrEmpty(user.Image) && !string.IsNullOrEmpty(user.ImageFormat))
-                {
-                    filePath = $"{Guid.NewGuid()}.{user.ImageFormat}";
-
-                    _ = UploadFile(user.Image, filePath);
-                }
-
-                var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
-                if (!sqsQueueResponse.Result)
-                    return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
-
                 var rabbitMqQueue = _userQueue.SendQueue(userEntity);
                 if (!rabbitMqQueue)
                     return _notification.AddWithReturn<int>(_notification.GetNotifications());
+                else
+                {
+                    if (!string.IsNullOrEmpty(user.Image) && !string.IsNullOrEmpty(user.ImageFormat))
+                    {
+                        filePath = $"{Guid.NewGuid()}.{user.ImageFormat}";
+
+                        _ = UploadFile(user.Image, filePath);
+                    }
+
+                    var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
+                    if (!sqsQueueResponse.Result)
+                        return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
+                }
 
                 return idUser;
             }
