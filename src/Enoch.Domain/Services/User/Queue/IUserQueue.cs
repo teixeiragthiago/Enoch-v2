@@ -14,5 +14,7 @@ namespace Enoch.Domain.Services.User.Queue
         Task<bool> SendSqsMessage(UserEntity user);
         Task<ReceiveMessageResponse> ReceiveSqsMessage();
         Task<bool> DeleteSqsMessage();
+
+        Task<bool> SendMessageQueue(UserEntity user);
     }
 }

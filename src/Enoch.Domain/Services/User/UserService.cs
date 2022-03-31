@@ -68,6 +68,18 @@ namespace Enoch.Domain.Services.User
             if (!user.IsValid(_notification))
                 return _notification.AddWithReturn<int>(_notification.GetNotifications());
 
+            var serviceBusResponse = _userQueue.SendMessageQueue(new UserEntity
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Status = UserEnum.Status.Enabled,
+                Profile = user.Profile,
+                DateRegister = DateTime.Now
+            });
+
+            if (!serviceBusResponse.Result)
+                return _notification.AddWithReturn<int>("Erro ao tentar enviar mensagem para a fila do Service Bus!");
+
             using (var transaction = new TransactionScope())
             {
                 var existingEmail = _userRepository.First(x => x.Email.LowerAndTrim() == user.Email.LowerAndTrim());
@@ -97,25 +109,26 @@ namespace Enoch.Domain.Services.User
                 {
                     _userRepository.PutImagePath(idUser, filePath);
 
-                    transaction.Complete();
                 }
 
-                var rabbitMqQueue = _userQueue.SendQueue(userEntity);
-                if (!rabbitMqQueue)
-                    return _notification.AddWithReturn<int>(_notification.GetNotifications());
-                else
-                {
-                    if (!string.IsNullOrEmpty(user.Image) && !string.IsNullOrEmpty(user.ImageFormat))
-                    {
-                        filePath = $"{Guid.NewGuid()}.{user.ImageFormat}";
+                //var rabbitMqQueue = _userQueue.SendQueue(userEntity);
+                //if (!rabbitMqQueue)
+                //    return _notification.AddWithReturn<int>(_notification.GetNotifications());
+                //else
+                //{
+                //    if (!string.IsNullOrEmpty(user.Image) && !string.IsNullOrEmpty(user.ImageFormat))
+                //    {
+                //        filePath = $"{Guid.NewGuid()}.{user.ImageFormat}";
 
-                        _ = UploadFile(user.Image, filePath);
-                    }
+                //        _ = UploadFile(user.Image, filePath);
+                //    }
 
-                    var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
-                    if (!sqsQueueResponse.Result)
-                        return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
-                }
+                //    var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
+                //    if (!sqsQueueResponse.Result)
+                //        return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
+                //}
+
+                transaction.Complete();
 
                 return idUser;
             }
