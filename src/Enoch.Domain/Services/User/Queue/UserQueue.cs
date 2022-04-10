@@ -1,6 +1,4 @@
-﻿using Amazon.SQS;
-using Amazon.SQS.Model;
-using Enoch.CrossCutting.AwsSQS;
+﻿using Enoch.CrossCutting;
 using Enoch.CrossCutting.LogWriter;
 using Enoch.CrossCutting.Notification;
 using Enoch.CrossCutting.RabbitMQConfig;
@@ -14,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Message = Microsoft.Azure.ServiceBus.Message;
 
 namespace Enoch.Domain.Services.User.Queue
 {
@@ -21,15 +20,11 @@ namespace Enoch.Domain.Services.User.Queue
     {
         private readonly INotification _notification;
         private IConnection _connection;
-        private readonly IAmazonSQS _sqsAmazon;
         private readonly string _queueName = RabbitMQConfig.GetData().QueueName;
-        private readonly int _maxMessages = 1;
-        private readonly int _waitTime = 2;
 
-        public UserQueue(INotification notification, IAmazonSQS sqsAmazon)
+        public UserQueue(INotification notification)
         {
             _notification = notification;
-            _sqsAmazon = sqsAmazon;
         }
 
         public bool SendQueue(UserEntity user)
@@ -83,61 +78,6 @@ namespace Enoch.Domain.Services.User.Queue
             return _connection != null;
         }
 
-        public async Task<bool> SendSqsMessage(UserEntity user)
-        {
-            try
-            {
-                var messageQueue = JsonConvert.SerializeObject(user);
-                var messageRequest = new SendMessageRequest(AwsConfig.GetSqsConfig().SqsConfig.QueueURL, messageQueue);
-
-                await _sqsAmazon.SendMessageAsync(messageRequest);
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogWriter.WriteError($"Erro ao tentar enviar mensagem para a fila {_queueName} do SQS : {e.Message}");
-                return false;
-            }
-        }
-
-        public async Task<ReceiveMessageResponse> ReceiveSqsMessage()
-        {
-            try
-            {
-                var message = await _sqsAmazon.ReceiveMessageAsync(new ReceiveMessageRequest
-                {
-                    QueueUrl = AwsConfig.GetSqsConfig().SqsConfig.QueueURL,
-                    MaxNumberOfMessages = _maxMessages,
-                    WaitTimeSeconds = _waitTime,
-                });
-
-                return message;
-            }
-            catch (Exception e)
-            {
-                LogWriter.WriteError($"Erro: {e.Message}");
-                return null;
-            }
-        }
-
-        public async Task<bool> DeleteSqsMessage()
-        {
-            try
-            {
-                var message = ReceiveSqsMessage();
-                if (message != null)
-                    await _sqsAmazon.DeleteMessageAsync(AwsConfig.GetSqsConfig().SqsConfig.QueueURL, message.Result.Messages.FirstOrDefault()?.ReceiptHandle);
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogWriter.WriteError($"Erro: {e.Message}");
-                return false;
-            }
-        }
-
         public async Task<bool> SendMessageQueue(UserEntity user)
         {
             try
@@ -145,8 +85,10 @@ namespace Enoch.Domain.Services.User.Queue
                 var config = ServiceBusConfig.GetData();
 
                 var client = new QueueClient(config.ConnectionString, config.QueueName, ReceiveMode.PeekLock);
-                var messageBody = JsonConvert.SerializeObject(user);
-                var message = new Microsoft.Azure.ServiceBus.Message(Encoding.UTF8.GetBytes(messageBody));
+
+                var test = user.CastObjectToMessageQueueByteArray();
+
+                var message = new Message(user.CastObjectToMessageQueueByteArray());
 
                 await client.SendAsync(message);
                 await client.CloseAsync();

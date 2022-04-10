@@ -68,70 +68,40 @@ namespace Enoch.Domain.Services.User
             if (!user.IsValid(_notification))
                 return _notification.AddWithReturn<int>(_notification.GetNotifications());
 
-            var serviceBusResponse = _userQueue.SendMessageQueue(new UserEntity
+            if (!_userFactory.VerifyPassword(user.Password))
+                return _notification.AddWithReturn<int>(_notification.GetNotifications());
+
+            Encryption.CreatePasswordHash(user.Password, out var passwordHash, out var passwordSalt);
+
+            var userEntity = new UserEntity
             {
                 Name = user.Name,
                 Email = user.Email,
                 Status = UserEnum.Status.Enabled,
                 Profile = user.Profile,
-                DateRegister = DateTime.Now
-            });
+                DateRegister = DateTime.Now,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
+            };
 
-            if (!serviceBusResponse.Result)
-                return _notification.AddWithReturn<int>("Erro ao tentar enviar mensagem para a fila do Service Bus!");
-
-            using (var transaction = new TransactionScope())
+            int idUser = 0;
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 var existingEmail = _userRepository.First(x => x.Email.LowerAndTrim() == user.Email.LowerAndTrim());
                 if (existingEmail != null)
                     return _notification.AddWithReturn<int>("Ops.. parece que o e-mail informado já possui cadastro!");
 
-                if (!_userFactory.VerifyPassword(user.Password))
-                    return _notification.AddWithReturn<int>(_notification.GetNotifications());
+                idUser = _userRepository.Post(userEntity);
 
-                Encryption.CreatePasswordHash(user.Password, out var passwordHash, out var passwordSalt);
-
-                var userEntity = new UserEntity
-                {
-                    Name = user.Name,
-                    Email = user.Email,
-                    Status = UserEnum.Status.Enabled,
-                    Profile = user.Profile,
-                    DateRegister = DateTime.Now,
-                    PasswordHash = passwordHash,
-                    PasswordSalt = passwordSalt
-                };
-
-                var idUser = _userRepository.Post(userEntity);
-
-                var filePath = string.Empty;
-                if (idUser > 0)
-                {
-                    _userRepository.PutImagePath(idUser, filePath);
-
-                }
-
-                //var rabbitMqQueue = _userQueue.SendQueue(userEntity);
-                //if (!rabbitMqQueue)
-                //    return _notification.AddWithReturn<int>(_notification.GetNotifications());
-                //else
-                //{
-                //    if (!string.IsNullOrEmpty(user.Image) && !string.IsNullOrEmpty(user.ImageFormat))
-                //    {
-                //        filePath = $"{Guid.NewGuid()}.{user.ImageFormat}";
-
-                //        _ = UploadFile(user.Image, filePath);
-                //    }
-
-                //    var sqsQueueResponse = _userQueue.SendSqsMessage(userEntity);
-                //    if (!sqsQueueResponse.Result)
-                //        return _notification.AddWithReturn<int>("Erro ao enviar mensagem para a fila do SQS");
-                //}
 
                 transaction.Complete();
-
-                return idUser;
             }
+
+            //_userQueue.SendQueue(userEntity);
+
+            _userQueue.SendMessageQueue(userEntity);
+
+            return idUser;
         }
 
         public bool Put(UserDto user)
@@ -198,14 +168,6 @@ namespace Enoch.Domain.Services.User
             _userRepository.PutPassword(user.Id, passwordHash, passwordSalt);
 
             return true;
-        }
-
-        public bool RemoveSqsQueue()
-        {
-            if (!_userQueue.DeleteSqsMessage().Result)
-                return _notification.AddWithReturn<bool>("Ops.. houve um erro ao tentar remover a mensagem da fila do SQS!");
-            else
-                return true;
         }
 
         public async Task<bool> UploadFile(string file, string key)

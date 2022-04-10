@@ -45,7 +45,6 @@ namespace Domain.Tests.User
             userFactory.Setup(x => x.VerifyPassword(It.IsAny<string>())).Returns(true);
             userRepository.Setup(x => x.Post(It.IsAny<UserEntity>())).Returns(user.Id);
             userQueue.Setup(x => x.SendQueue(It.IsAny<UserEntity>())).Returns(true);
-            userQueue.Setup(x => x.SendSqsMessage(It.IsAny<UserEntity>())).ReturnsAsync(true);
             //awsStorage.Setup(x => x.UploadFileAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
             //transferUtility.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>());
 

@@ -5,12 +5,15 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Enoch.CrossCutting
 {
     public static class Extensions
     {
+        public static byte[] CastObjectToMessageQueueByteArray(this object data) => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
+
         public static IQueryable<T> Paginate<T>(this IQueryable<T> elements, int? page, out int total)
         {
             total = elements.Count();
