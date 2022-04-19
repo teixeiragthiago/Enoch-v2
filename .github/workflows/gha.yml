@@ -20,9 +20,8 @@ jobs:
           dotnet-version: '5.x'
       - name: Restore
         run: dotnet restore
-      - name: Build and Publish
-        run: |
-          dotnet build -c Release
+      - name: Build
+        run: dotnet build
       - name: Test
         run: dotnet test
       # - uses: azure/webapps-deploy@v2
