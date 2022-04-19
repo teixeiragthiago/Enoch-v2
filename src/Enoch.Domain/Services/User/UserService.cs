@@ -97,10 +97,6 @@ namespace Enoch.Domain.Services.User
                 transaction.Complete();
             }
 
-            //_userQueue.SendQueue(userEntity);
-
-            _userQueue.SendMessageQueue(userEntity);
-
             return idUser;
         }
 
@@ -193,5 +189,9 @@ namespace Enoch.Domain.Services.User
             return string.IsNullOrEmpty(url) ? string.Empty : url;
         }
 
+        public bool PostMessage(UserDto user)
+        {
+            return true;            
+        }
     }
 }

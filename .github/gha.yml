@@ -1,0 +1,32 @@
+name: Build, Test and Publish .NET 5
+
+# env:
+#   AZURE_WEBAPP_NAME: gha-demo
+#   AZURE_WEBAPP_PACKAGE_PATH: './GitHubActionsDemo.API'
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET 5
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.x'
+      - name: Restore
+        run: dotnet restore
+      - name: Build and Publish
+        run: |
+          dotnet build -c Release
+      - name: Test
+        run: dotnet test
+      # - uses: azure/webapps-deploy@v2
+      #   with:
+      #     app-name: ${{ env.AZURE_WEBAPP_NAME }}
+      #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+      #     package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/publish'
