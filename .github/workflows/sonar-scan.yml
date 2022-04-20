@@ -45,3 +45,13 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"teixeiragthiago_Enoch-v2" /o:"teixeiragthiago" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+      - name: Installing Sonar Scanner
+        run:
+          dotnet tool install --global dotnet-sonarscanner --version 5.2.0
+          dotnet tool update dotnet-reportgenerator-globaltool -g --version 4.8.7
+      - name: Unit Tests Report
+        run: 
+          dotnet sonarscanner begin /k:"teixeiragthiago_Enoch-v2" /d:sonar.host.url="https://sonarcloud.io"  /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.coverageReportPaths=".\sonarqubecoverage\SonarQube.xml"
+          dotnet test --no-build --collect:"XPlat Code Coverage"
+          reportgenerator "-reports:*\TestResults\*\coverage.cobertura.xml" "-targetdir:sonarqubecoverage" "-reporttypes:SonarQube"
+          dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
