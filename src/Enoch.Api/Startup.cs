@@ -58,7 +58,7 @@ namespace Enoch.Api
             #endregion
 
             #region Token
-            //Token(services);
+            Token(services);
             #endregion
 
             //var cred = new BasicAWSCredentials(Environment.GetEnvironmentVariable("AWS_ACCESSKEY"), Environment.GetEnvironmentVariable("AWS_SECRET"));

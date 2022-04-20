@@ -20,6 +20,7 @@ namespace Enoch.Api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "User,Adminstrator")]
         public IActionResult Get(int? page = null)
         {
             var users = _userService.Get(out var total, page);
@@ -28,6 +29,7 @@ namespace Enoch.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "User,Adminstrator")]
         public IActionResult GetById(int id)
         {
             var users = _userService.GetById(id);
@@ -47,6 +49,7 @@ namespace Enoch.Api.Controllers
         }
 
         [HttpPut]
+        [Authorize(Roles = "Adminstrator")]
         public IActionResult Put(UserDto user)
         {
             var userData = _userService.Put(user);
@@ -58,6 +61,7 @@ namespace Enoch.Api.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = "Adminstrator")]
         public IActionResult Delete(int id)
         {
             var response = _userService.Delete(id);
