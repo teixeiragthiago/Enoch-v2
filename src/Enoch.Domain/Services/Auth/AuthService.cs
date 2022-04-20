@@ -17,14 +17,12 @@ namespace Enoch.Domain.Services.Auth
         private readonly IUserRepository _userRepository;
         private readonly INotification _notification;
         private readonly IConfiguration _configuration;
-        private readonly IUserFactory _userFactory;
 
-        public AuthService(IUserRepository userRepository, INotification notification, IConfiguration configuration, IUserFactory userFactory)
+        public AuthService(IUserRepository userRepository, INotification notification, IConfiguration configuration)
         {
             _userRepository = userRepository;
             _notification = notification;
             _configuration = configuration;
-            _userFactory = userFactory;
         }
 
         public UserTokenDto GenerateToken(AuthDto dto)
