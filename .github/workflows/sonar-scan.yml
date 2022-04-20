@@ -62,6 +62,6 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"teixeiragthiago_Enoch-v2" /o:"teixeiragthiago" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -l trx
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"      
-          
-      - name: Build
+
+      - name: Final build
         run: dotnet build --configuration Release --no-restore
