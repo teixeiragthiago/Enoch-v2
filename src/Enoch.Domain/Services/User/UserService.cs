@@ -138,8 +138,6 @@ namespace Enoch.Domain.Services.User
 
             _userRepository.Delete(user);
 
-            _ = _awsS3.Delete(user.ImagePath, _bucketName);
-
             return true;
 
         }

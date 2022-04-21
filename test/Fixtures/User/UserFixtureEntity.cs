@@ -1,4 +1,5 @@
-﻿using Enoch.Domain.Services.User.Common;
+﻿using Enoch.CrossCutting;
+using Enoch.Domain.Services.User.Common;
 using Enoch.Domain.Services.User.Entities;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ namespace Fixtures.User
     {
         public static UserEntity CreateValidAdmin()
         {
+            Encryption.CreatePasswordHash("AS67xOi5#", out var passwordHash, out var passwordSalt);
+
             return new UserEntity
             {
                 Id = 1,
@@ -16,11 +19,15 @@ namespace Fixtures.User
                 Email = "thiago@cloudmed.io",
                 Status = UserEnum.Status.Enabled,
                 Profile = UserEnum.Profile.Adminstrator,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
             };
         }
 
         public static UserEntity CreateValidAdmin(string name, string email)
         {
+            Encryption.CreatePasswordHash("AS67xOi5#", out var passwordHash, out var passwordSalt);
+
             var random = new Random();
 
             return new UserEntity
@@ -30,6 +37,8 @@ namespace Fixtures.User
                 Email = email,
                 Status = UserEnum.Status.Enabled,
                 Profile = UserEnum.Profile.Adminstrator,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
             };
         }
 
@@ -47,6 +56,8 @@ namespace Fixtures.User
 
         public static UserEntity CreateValidUser()
         {
+            Encryption.CreatePasswordHash("AS67xOi5#", out var passwordHash, out var passwordSalt);
+
             return new UserEntity
             {
                 Id = 1,
@@ -54,11 +65,15 @@ namespace Fixtures.User
                 Email = "thiago@cloudmed.io",
                 Status = UserEnum.Status.Enabled,
                 Profile = UserEnum.Profile.User,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
             };
         }
 
         public static UserEntity CreateValidUser(string name, string email)
         {
+            Encryption.CreatePasswordHash("AS67xOi5#", out var passwordHash, out var passwordSalt);
+
             var random = new Random();
 
             return new UserEntity
@@ -68,6 +83,8 @@ namespace Fixtures.User
                 Email = email,
                 Status = UserEnum.Status.Enabled,
                 Profile = UserEnum.Profile.Adminstrator,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
             };
         }
 
