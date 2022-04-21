@@ -42,17 +42,19 @@ jobs:
           
       - name: Install project dependencies
         run: dotnet restore
-      - name: Test and Report
+
+      - name: Test and Collect coverage
         env: 
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}       
         shell: powershell
         run: |
            .\.sonar\scanner\dotnet-sonarscanner begin /k:"teixeiragthiago_Enoch-v2" /o:"teixeiragthiago" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-           /d:sonar.cs.opencover.reportsPaths=test/**/TestResults/**/coverage.cobertura.xml
+           /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
            /d:sonar.coverage.exclusions="**Test*.cs,**Program.cs,**Startup.cs,**DependencyInjection.cs"
            dotnet build \
-           dotnet test --collect:"XPlat Code Coverage" --no-build
+           dotnet test --collect:"XPlat Code Coverage" --no-build -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"   
 
       # - name: Test and analyze
       #   env: 
