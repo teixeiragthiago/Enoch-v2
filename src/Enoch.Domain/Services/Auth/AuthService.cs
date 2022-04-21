@@ -32,7 +32,7 @@ namespace Enoch.Domain.Services.Auth
                 return _notification.AddWithReturn<UserTokenDto>(_notification.GetNotifications());
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration.Get<AppSettings>().Secret);
+            var key = Encoding.ASCII.GetBytes(_configuration.GetSection("AppSettings:Secret").Value);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
