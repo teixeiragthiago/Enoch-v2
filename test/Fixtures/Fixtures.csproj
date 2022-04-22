@@ -2,8 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<SonarQubeTestProject>true</SonarQubeTestProject>
-		<SonarQubeExclude>true</SonarQubeExclude>
 	</PropertyGroup>
 
 	<ItemGroup>
