@@ -56,8 +56,6 @@ jobs:
         shell: powershell
         run: |
            .\.sonar\scanner\dotnet-sonarscanner begin /k:"teixeiragthiago_Enoch-v2" /o:"teixeiragthiago" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" 
-           /d:sonar.coverage.exclusions="src/Enoch.CrossCutting/Email.cs, src/Enoch.CrossCutting/AppSettings.cs, src/Enoch.CrossCutting/Parameters.cs, src/Enoch.CrossCutting/Notification.cs, src/Enoch.CrossCutting/Email.cs, src/Enoch.CrossCutting/AwsSQS/**.cs, 
-           src/Enoch.CrossCutting/AwsS3/**.cs, src/Enoch.CrossCutting/LogWriter/**.cs, src/Enoch.CrossCutting/RabbitMQConfig/**.cs, src/Enoch.CrossCutting/ServiceBusConfig/**.cs \"
             dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
            .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"    
       
