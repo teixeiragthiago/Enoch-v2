@@ -67,6 +67,9 @@ namespace Enoch.CrossCutting
 
         public static bool IsCpf(this long cpf)
         {
+            if (cpf.ToString().Length < 11)
+                return false;
+
             var convertedInput = $"{cpf}";
 
             convertedInput = convertedInput.PadLeft(11, '0');
@@ -108,7 +111,7 @@ namespace Enoch.CrossCutting
                    .IsMatch(mail);
 
         public static bool IsValidPhone(this string phone)
-            => !string.IsNullOrEmpty(phone) && new Regex(@"^(\([0-9]{2}\))\s([9]{1})?([0-9]{4})-([0-9]{4})$")
+            => !string.IsNullOrEmpty(phone) && new Regex(@"(\(?\d{2}\)?\s)?(\d{4,5}\-\d{4})")
                    .IsMatch(phone);
 
         public static string CastCnpj(this long value)

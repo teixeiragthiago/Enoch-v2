@@ -31,6 +31,9 @@ namespace Enoch.Domain.Services.Auth
             if (user == null)
                 return _notification.AddWithReturn<UserTokenDto>(_notification.GetNotifications());
 
+            if (!dto.IsValid(_notification))
+                return _notification.AddWithReturn<UserTokenDto>(_notification.GetNotifications());
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration.GetSection("AppSettings:Secret").Value);
 

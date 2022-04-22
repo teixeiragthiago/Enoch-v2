@@ -21,12 +21,32 @@ namespace Fixtures.Auth
             };
         }
 
+        public static UserTokenDto CreateInvalidToken()
+        {
+            return new UserTokenDto
+            {
+                Name = "",
+                Email = "",
+                Profile = UserEnum.Profile.Adminstrator,
+                Token = ""
+            };
+        }
+
         public static AuthDto CreateAuthData()
         {
             return new AuthDto
             {
                 Email = "thiago@cloudmed.io",
                 Password = "AS67xOi5#"
+            };
+        }
+
+        public static AuthDto CreateInvalidAuthData()
+        {
+            return new AuthDto
+            {
+                Email = "",
+                Password = ""
             };
         }
     }

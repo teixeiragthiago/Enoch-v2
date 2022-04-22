@@ -35,8 +35,8 @@ namespace Domain.Tests.Auth
 
             configurationSection.Setup(x => x.Value).Returns("SECRETKEYVALUETESTECOMVALORESALEATORIOS");
             configuration.Setup(x => x.GetSection("AppSettings:Secret")).Returns(configurationSection.Object);
-
             userRepository.Setup(x => x.First(It.IsAny<Expression<Func<UserEntity, bool>>>())).Returns(UserFixtureEntity.CreateValidUser());
+            notification.Setup(x => x.Any()).Returns(false);
 
             var authService = new AuthService(userRepository.Object, notification.Object, configuration.Object);
 
@@ -46,6 +46,31 @@ namespace Domain.Tests.Auth
             //Assert
             Assert.NotNull(token);
             Assert.NotEmpty(token.Token);
+            Assert.True(authDto.IsValid(notification.Object));
+            userRepository.Verify(r => r.First(It.IsAny<Expression<Func<UserEntity, bool>>>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "AuthService, GenerateToken must not return Token when e-mail is invalid")]
+        [Trait("Domain", "Auth Service")]
+        public void AuthService_GenerateToken_MustNotReturnTokenWhenEmailIsInvalid()
+        {
+            //Arrange
+            var authDto = AuthFixtureDto.CreateInvalidAuthData();
+
+            configurationSection.Setup(x => x.Value).Returns("SECRETKEYVALUETESTECOMVALORESALEATORIOS");
+            configuration.Setup(x => x.GetSection("AppSettings:Secret")).Returns(configurationSection.Object);
+            userRepository.Setup(x => x.First(It.IsAny<Expression<Func<UserEntity, bool>>>())).Returns(UserFixtureEntity.CreateValidUser());
+            notification.Setup(x => x.Any()).Returns(true);
+
+            var authService = new AuthService(userRepository.Object, notification.Object, configuration.Object);
+
+            //Act
+            var token = authService.GenerateToken(authDto);
+
+            //Assert
+            Assert.Null(token);
+            Assert.Empty(authDto.Email);
+            Assert.False(authDto.IsValid(notification.Object));
             userRepository.Verify(r => r.First(It.IsAny<Expression<Func<UserEntity, bool>>>()), Times.Once);
         }
 
