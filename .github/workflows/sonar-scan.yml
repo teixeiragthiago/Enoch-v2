@@ -49,3 +49,18 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"teixeiragthiago_Enoch-v2" /o:"teixeiragthiago" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Test and Collect coverage
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}       
+        shell: powershell
+        run: |
+           .\.sonar\scanner\dotnet-sonarscanner begin /k:"teixeiragthiago_Enoch-v2" 
+           /o:"teixeiragthiago" 
+           /d:sonar.login="${{ secrets.SONAR_TOKEN }}" 
+           /d:sonar.host.url="https://sonarcloud.io"
+           /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+           /d:sonar.coverage.exclusions="**Tests*.cs,**Program.cs,**Startup.cs"
+            dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"    
