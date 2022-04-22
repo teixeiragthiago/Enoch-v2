@@ -5,6 +5,11 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+
+env: 
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 jobs:
   build:
     name: Build
@@ -41,9 +46,6 @@ jobs:
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
       - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"teixeiragthiago_Enoch-v2" /o:"teixeiragthiago" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
@@ -51,13 +53,10 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
       - name: Test and Collect coverage
-        env: 
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}       
         shell: powershell
         run: |
            .\.sonar\scanner\dotnet-sonarscanner begin /k:"teixeiragthiago_Enoch-v2" /o:"teixeiragthiago" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-           /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs,**Program.cs,**Startup.cs"
+           /d:sonar.cs.opencover.reportsPaths="**/coverage.cobertura.xml" /d:sonar.coverage.exclusions="**Tests*.cs,**Program.cs,**Startup.cs"
             dotnet build
             dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
            .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"    
