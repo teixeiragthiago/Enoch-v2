@@ -145,31 +145,6 @@ namespace Enoch.CrossCutting
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-
-        //public static Token Token(this string token)
-        //{
-        //    if (string.IsNullOrEmpty(token))
-        //        return default;
-
-        //    token = token.Replace("Bearer ", "").Replace("Bearer", "");
-        //    var handler = new JwtSecurityTokenHandler();
-        //    var claims = handler.ReadJwtToken(token).Claims.ToList();
-
-        //    if (string.IsNullOrEmpty(token))
-        //        return null;
-
-        //    var dateNow = DateTime.Now;
-        //    var dateBirth = Convert.ToDateTime(claims[4].Value);
-        //    return new Token
-        //    {
-        //        Name = Decrypt(claims[0].Value),
-        //        Actor = Decrypt(claims[1].Value),
-        //        NameIdentifier = Decrypt(claims[2].Value),
-        //        Authentication = claims[3].Value,
-        //        IntervalToken = dateNow.Subtract(dateBirth).TotalMinutes
-        //    };
-        //}
-
     }
 
     public class Token

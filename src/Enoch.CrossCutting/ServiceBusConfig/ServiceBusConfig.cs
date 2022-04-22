@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Enoch.CrossCutting.ServiceBusConfig
 {
-    public class ServiceBusConfig
+    public static class ServiceBusConfig
     {
         private static readonly string _primaryKey = Environment.GetEnvironmentVariable("SERVICE_BUS_PRIMARY_KEY");
         private static readonly string _primaryConnectionString =  Environment.GetEnvironmentVariable("SERVICE_BUS_PRIMARY_CONNSTRING");

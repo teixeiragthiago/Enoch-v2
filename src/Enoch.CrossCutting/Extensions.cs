@@ -198,28 +198,6 @@ namespace Enoch.CrossCutting
 
         public static string LowerAndTrim(this string input) => input.ToLower().Trim();
 
-        //public static T FindConfigValue<T>(string key)
-        //{
-        //    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-        //    var basePath = AppDomain.CurrentDomain.BaseDirectory;
-        //    var builder = new ConfigurationBuilder()
-        //        //.SetBasePath(basePath)
-        //        .AddJsonFile("appsettings.json", true, true)
-        //        .AddJsonFile($"appsettings.{env}.json", true)
-        //        .AddEnvironmentVariables();
-
-        //    var configRoot = builder.Build();
-
-        //    var parameters = configRoot.Providers.Skip(1).FirstOrDefault();
-        //    if (parameters != null)
-        //    {
-        //        parameters.TryGet($"Parameters:{key}", out var value);
-        //        return Cast(value, typeof(T));
-        //    }
-
-        //    return default(T);
-        //}
-
         public static dynamic Cast(dynamic obj, Type castTo)
         {
             return Convert.ChangeType(obj, castTo);
