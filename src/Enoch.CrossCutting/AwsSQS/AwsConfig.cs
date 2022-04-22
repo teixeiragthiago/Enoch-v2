@@ -18,7 +18,7 @@ namespace Enoch.CrossCutting.AwsSQS
         {
             return new AwsConfigData
             {
-                SqsConfig = new SQSDataConfig
+                SqsConfig = new SqsDataConfig
                 {
                     SqsClient = _client,
                     QueueURL = _urlQueue,
@@ -35,11 +35,11 @@ namespace Enoch.CrossCutting.AwsSQS
 
     public sealed class AwsConfigData
     {
-        public SQSDataConfig SqsConfig { get; set; }
+        public SqsDataConfig SqsConfig { get; set; }
         public AwsS3DataConfig AwsS3Config { get; set; }
     }
 
-    public sealed class SQSDataConfig
+    public sealed class SqsDataConfig
     {
         public string SqsClient { get; set; }
         public string QueueURL { get; set; }

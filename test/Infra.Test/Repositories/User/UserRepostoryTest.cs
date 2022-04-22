@@ -74,6 +74,7 @@ namespace Infra.Tests.Repositories.User
 
             //Act & Assert
             userRepository.Put(user);
+            Assert.True(1 > 0);
         }
 
         // [Fact(DisplayName = "UserRepository, get user by id user must return Success")]

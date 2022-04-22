@@ -46,16 +46,6 @@ namespace Enoch.CrossCutting
             return originalPassWord;
         }
 
-        public static string CreateDefaultPassWord(int stringLength)
-        {
-            var rd = new Random();
-            var chars = new char[stringLength];
-            for (var i = 0; i < stringLength; i++)
-                chars[i] = AllowedChars[rd.Next(0, AllowedChars.Length)];
-
-            return new string(chars);
-        }
-
         public static string Encrypt(string input)
         {
             var bytesBuff = Encoding.Unicode.GetBytes(input);
