@@ -1,5 +1,4 @@
 ﻿using Enoch.CrossCutting;
-using Enoch.CrossCutting.AwsS3;
 using Enoch.CrossCutting.Notification;
 using Enoch.Domain.Services.User.Common;
 using Enoch.Domain.Services.User.Dto;
@@ -19,16 +18,14 @@ namespace Enoch.Domain.Services.User
         private readonly INotification _notification;
         private readonly IUserFactory _userFactory;
         private readonly IUserQueue _userQueue;
-        private readonly AwsStorage _awsS3;
         private readonly string _bucketName = Environment.GetEnvironmentVariable("AWS_BUCKET");
 
-        public UserService(IUserRepository userRepository, INotification notification, IUserFactory userFactory, IUserQueue userQueue, AwsStorage awsS3)
+        public UserService(IUserRepository userRepository, INotification notification, IUserFactory userFactory, IUserQueue userQueue)
         {
             _userRepository = userRepository;
             _notification = notification;
             _userFactory = userFactory;
             _userQueue = userQueue;
-            _awsS3 = awsS3;
         }
 
         public IEnumerable<UserDataDto> Get(out int total, int? page = null)
@@ -43,7 +40,6 @@ namespace Enoch.Domain.Services.User
                 DateRegister = x.DateRegister,
                 Profile = x.Profile,
                 Status = x.Status,
-                Image = GetUserImage(x.ImagePath)
             });
         }
         public UserDataDto GetById(int id)
@@ -59,7 +55,6 @@ namespace Enoch.Domain.Services.User
                 DateRegister = user.DateRegister,
                 Profile = user.Profile,
                 Status = user.Status,
-                Image = GetUserImage(user.ImagePath)
             };
         }
 
@@ -172,19 +167,7 @@ namespace Enoch.Domain.Services.User
             if (string.IsNullOrEmpty(bucketName))
                 return _notification.AddWithReturn<bool>("Ops.. parece que o Bucket não foi informado!");
 
-            await _awsS3.UploadFileAsync(fileByte, key, bucketName);
-
             return true;
-        }
-
-        private string GetUserImage(string keyName)
-        {
-            if (string.IsNullOrEmpty(_bucketName))
-                return string.Empty;
-
-            var url = _awsS3.UrlFile(keyName, _bucketName);
-
-            return string.IsNullOrEmpty(url) ? string.Empty : url;
         }
 
         public bool PostMessage(UserDto user)

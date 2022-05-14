@@ -6,7 +6,6 @@ using Amazon.SQS;
 using AutoMapper;
 using CrossCutting.Email;
 using Enoch.CrossCutting;
-using Enoch.CrossCutting.AwsS3;
 using Enoch.CrossCutting.Notification;
 using Enoch.CrossCutting.WebApi;
 using Enoch.Domain.Common;
@@ -56,35 +55,6 @@ namespace Enoch.Api.Infra
             Repositories(services);
             Queues(services);
             #endregion
-
-            #region AwsSQS
-            AwsSqs(services);
-            #endregion
-
-            #region AwsS3   
-            AwsS3(services);
-            #endregion
-
-        }
-
-        private static void AwsS3(this IServiceCollection services)
-        {
-            services.AddAWSService<IAmazonS3>();
-            services.AddSingleton<AwsStorage>();
-        }
-
-        private static void AwsSqs(this IServiceCollection services)
-        {
-            var cred = new BasicAWSCredentials(Environment.GetEnvironmentVariable("AWS_ACCESSKEY"), Environment.GetEnvironmentVariable("AWS_SECRET"));
-
-            services.AddDefaultAWSOptions(new AWSOptions
-            {
-                Region = RegionEndpoint.SAEast1,
-                Profile = Environment.GetEnvironmentVariable("AWS_PROFILE"),
-                Credentials = cred,
-            });
-
-            services.AddAWSService<IAmazonSQS>();
         }
 
         private static void Factories(IServiceCollection services)

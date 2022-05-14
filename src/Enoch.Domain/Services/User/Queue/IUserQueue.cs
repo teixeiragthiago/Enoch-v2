@@ -11,6 +11,5 @@ namespace Enoch.Domain.Services.User.Queue
     public interface IUserQueue
     {
         bool SendQueue(UserEntity user);
-        Task<bool> SendMessageQueue(UserEntity user);
     }
 }

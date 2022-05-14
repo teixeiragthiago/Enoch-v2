@@ -2,7 +2,6 @@
 using Enoch.CrossCutting.LogWriter;
 using Enoch.CrossCutting.Notification;
 using Enoch.CrossCutting.RabbitMQConfig;
-using Enoch.CrossCutting.ServiceBusConfig;
 using Enoch.Domain.Services.User.Entities;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
@@ -76,31 +75,6 @@ namespace Enoch.Domain.Services.User.Queue
             CreateConnection();
 
             return _connection != null;
-        }
-
-        public async Task<bool> SendMessageQueue(UserEntity user)
-        {
-            try
-            {
-                var config = ServiceBusConfig.GetData();
-
-                var client = new QueueClient(config.ConnectionString, config.QueueName, ReceiveMode.PeekLock);
-
-                var test = user.CastObjectToMessageQueueByteArray();
-
-                var message = new Message(user.CastObjectToMessageQueueByteArray());
-
-                await client.SendAsync(message);
-                await client.CloseAsync();
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogWriter.WriteError($"Erro: {e.Message}");
-
-                return false;
-            }
         }
     }
 }

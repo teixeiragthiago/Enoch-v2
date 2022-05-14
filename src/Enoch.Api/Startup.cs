@@ -6,7 +6,6 @@ using dotenv.net;
 using Enoch.Api.Infra;
 using Enoch.Api.Infra.HealthChecks;
 using Enoch.CrossCutting;
-using Enoch.CrossCutting.AwsSQS;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
