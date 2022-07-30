@@ -1,30 +1,16 @@
-using Amazon;
-using Amazon.Extensions.NETCore.Setup;
-using Amazon.Runtime;
-using Amazon.SQS;
 using dotenv.net;
 using Enoch.Api.Infra;
 using Enoch.Api.Infra.HealthChecks;
 using Enoch.CrossCutting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Net.Mime;
 using System.Text;
-using System.Text.Json;
 
 namespace Enoch.Api
 {
-    public class Startup
+    public class Startup : IStartup
     {
         public Startup(IConfiguration configuration)
         {
@@ -60,17 +46,6 @@ namespace Enoch.Api
             Token(services);
             #endregion
 
-            //var cred = new BasicAWSCredentials(Environment.GetEnvironmentVariable("AWS_ACCESSKEY"), Environment.GetEnvironmentVariable("AWS_SECRET"));
-
-            //services.AddDefaultAWSOptions(new AWSOptions
-            //{
-            //    Region = RegionEndpoint.SAEast1,
-            //    Profile = Environment.GetEnvironmentVariable("AWS_PROFILE"),
-            //    Credentials = cred,
-            //});
-
-            //services.AddAWSService<IAmazonSQS>();
-
             services.AddHttpClient();
 
             services.AddControllers();
@@ -82,7 +57,7 @@ namespace Enoch.Api
 
 
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(WebApplication app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -179,6 +154,31 @@ namespace Enoch.Api
                     .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                     .RequireAuthenticatedUser().Build());
             });
+        }
+    }
+
+    public interface IStartup
+    {
+        IConfiguration Configuration { get; }
+        void Configure(WebApplication app, IWebHostEnvironment environment);
+        void ConfigureServices(IServiceCollection services);
+    }
+
+    public static class  StartupExtensions 
+    {
+        public static WebApplicationBuilder UseStartup<TStartup>(this WebApplicationBuilder builder) where TStartup : IStartup
+        {
+            var startup = Activator.CreateInstance(typeof(TStartup), builder.Configuration) as IStartup;
+            if (startup == null) throw new ArgumentException("Classe Startup.cs is invalid!");
+
+            startup.ConfigureServices(builder.Services);
+
+            var app = builder.Build();
+            startup.Configure(app, app.Environment);
+
+            app.Run();
+
+            return builder;
         }
     }
 }

@@ -1,19 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+	  <TargetFramework>net6.0</TargetFramework>
+	  <Nullable>disable</Nullable>
+	  <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="10.1.1" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.2.29" />
-    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.2.0" />
-    <PackageReference Include="MoqExpression" Version="2.0.0" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.2.4" />
+	<PackageReference Include="AutoMapper" Version="10.1.1" />
+	<PackageReference Include="AWSSDK.SQS" Version="3.7.2.29" />
+	<PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.2.0" />
+	<PackageReference Include="MoqExpression" Version="2.0.0" />
+	<PackageReference Include="RabbitMQ.Client" Version="6.2.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Enoch.CrossCutting\Enoch.CrossCutting.csproj" />
+	<ProjectReference Include="..\Enoch.CrossCutting\Enoch.CrossCutting.csproj" />
   </ItemGroup>
 
 </Project>
