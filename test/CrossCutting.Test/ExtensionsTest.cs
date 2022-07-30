@@ -152,7 +152,7 @@ namespace CrossCutting.Tests
             Assert.NotEqual(plainText, decryptedResult);
         }
 
-        [Theory(DisplayName = "Email Validation, must return Success")]
+        [Theory(DisplayName = "Email Validation, must return True")]
         [Trait("CrossCutting", "Email Validation")]
         [InlineData("thiago_test_com@email.com")]
         [InlineData("thiago_test_com_br@email.com.br")]
@@ -169,7 +169,7 @@ namespace CrossCutting.Tests
             Assert.True(validEmail);
         }
 
-        [Theory(DisplayName = "Email Validation, must return Error")]
+        [Theory(DisplayName = "Email Validation, must return False")]
         [Trait("CrossCutting", "Email Validation")]
         [InlineData("thiago")]
         [InlineData("thiago_test_com_bremail.com.br")]

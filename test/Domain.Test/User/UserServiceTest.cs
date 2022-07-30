@@ -3,6 +3,7 @@ using Amazon.S3.Transfer;
 using AutoMapper;
 using Enoch.CrossCutting.Notification;
 using Enoch.Domain.Services.User;
+using Enoch.Domain.Services.User.Common;
 using Enoch.Domain.Services.User.Dto;
 using Enoch.Domain.Services.User.Entities;
 using Enoch.Domain.Services.User.Queue;
@@ -150,5 +151,36 @@ namespace Domain.Tests.User
             //Assert
             Assert.True(response);
         }
+
+        [Fact(DisplayName = "UserService, delete user must return Success")]
+        [Trait("Domain", "User Service")]
+        public void UserTestCompare()
+        {
+            //Arrange
+
+            var usuario1 = new UserEntity
+            {
+                Id = 1,
+                Name = "Thiago",
+                Email = "thiago@email.com",
+                DateRegister = DateTime.Now,
+                Profile = UserEnum.Profile.User,
+                Status = UserEnum.Status.Enabled
+            };
+
+            var usuario2 = new UserEntity
+            {
+                Id = 1,
+                Name = "Thiago",
+                Email = "thiago@email.com",
+                DateRegister = DateTime.Now,
+                Profile = UserEnum.Profile.User,
+                Status = UserEnum.Status.Enabled
+            };
+
+            //Assert
+            Assert.Equal(usuario1, usuario2);
+        }
+
     }
 }

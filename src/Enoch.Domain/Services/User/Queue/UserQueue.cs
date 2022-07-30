@@ -39,6 +39,7 @@ namespace Enoch.Domain.Services.User.Queue
 
                     channel.BasicPublish(exchange: "", routingKey: _queueName, basicProperties: null, body: message);
 
+
                     return true;
                 }
             }
