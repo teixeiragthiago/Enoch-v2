@@ -1,12 +1,10 @@
 ﻿using Enoch.Domain.Base;
-using Enoch.Domain.Services.User;
 using Enoch.Domain.Services.User.Entities;
 using Enoch.Infra.Context;
 using Enoch.Infra.User;
 using Fixtures.User;
 using Moq;
 using Moq.AutoMock;
-using System.Linq;
 using Xunit;
 
 namespace Infra.Tests.Repositories.User
